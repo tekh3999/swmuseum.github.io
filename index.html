@@ -190,11 +190,11 @@
 	//			Add Lights						 //
 	//////////////////////////////////////////////
 	var light = new THREE.DirectionalLight( 0xccccff, 1 );
-			light.position.set( -1, 0.75, -0.5 );
+			light.position.set( -10, 0.75, -0.5 );
 			scene.add( light );
 			
 			var light = new THREE.DirectionalLight( 0xffddcc, 1 );
-			light.position.set( 1, 0.75, 0.5 );
+			light.position.set( 10, 0.75, 0.5 );
 			scene.add( light );
 	/////////////////////////////////////////////////////
 	//     add json object                             //
@@ -244,7 +244,7 @@ transparent : true,
 }
 //to sit standing up
 //rotateObject(mesh, -90,-90,-90);
-rotateObject(mesh, 0,0,0);
+rotateObject(mesh,-90,0,0);
 
 
 			} );
