@@ -172,7 +172,7 @@
 	// init controls for camera
 	var markerControls = new THREEx.ArMarkerControls(arToolkitContext, camera, {
 		type : 'pattern',
-		patternUrl : THREEx.ArToolkitContext.baseURL + 'data/data/tut.patt',
+		patternUrl : THREEx.ArToolkitContext.baseURL + 'data/data/tut-clr.patt',
 //patternUrl : THREEx.ArToolkitContext.baseURL + 'data/data/patt.hiro',
 		// patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.kanji',
 		// as we controls the camera, set changeMatrixMode: 'cameraTransformMatrix'
@@ -182,7 +182,7 @@
 	scene.visible = false
 
 	//////////////////////////////////////////////////////////////////////////////////
-	//		add an object in the scene
+	//		add an object in the scene												//
 	//////////////////////////////////////////////////////////////////////////////////
 
 	// add a torus knot	
@@ -191,13 +191,15 @@
 	
 	///////////////////////////////////////////////
 	//			Add Lights						 //
+	//////////////////////////////////////////////
+	
 	//var light = new THREE.DirectionalLight( 0xccccff, 1 );
-	var light = new THREE.AmbientLight( 0xccccff, 0.7 );
+	var light = new THREE.AmbientLight(  0xccccff, 0.76 );
 			light.position.set( -200, 0.75, -0.5 );
 			scene.add( light );
 			
 			//ar light = new THREE.DirectionalLight( 0xffddcc, 1 );
-			 var light = new THREE.AmbientLight( 0xccccff, 0.7 );
+			 var light = new THREE.AmbientLight(  0xccccff, 0.7 );
 			light.position.set( 200, 0.75, 0.5 );
 			scene.add( light );
 			
