@@ -191,13 +191,14 @@
 	
 	///////////////////////////////////////////////
 	//			Add Lights						 //
-	//////////////////////////////////////////////
-	var light = new THREE.DirectionalLight( 0xccccff, 1 );
-			light.position.set( -10, 0.75, -0.5 );
+	//var light = new THREE.DirectionalLight( 0xccccff, 1 );
+	var light = new THREE.AmbientLight( 0xccccff, 0.7 );
+			light.position.set( -200, 0.75, -0.5 );
 			scene.add( light );
 			
-			var light = new THREE.DirectionalLight( 0xffddcc, 1 );
-			light.position.set( 10, 0.75, 0.5 );
+			//ar light = new THREE.DirectionalLight( 0xffddcc, 1 );
+			 var light = new THREE.AmbientLight( 0xccccff, 0.7 );
+			light.position.set( 200, 0.75, 0.5 );
 			scene.add( light );
 			
 			
