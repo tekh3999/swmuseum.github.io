@@ -4,6 +4,9 @@
 <!--<meta name="viewport" container="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">-->
 <!-- three.js library -->
 <script src='vendor/three.js/build/three.min.js'></script>
+
+<!--Third-pary js-->
+   <script src="Third-party/OBJLoader.js"></script>
 <!-- ar.js -->
 <script src="build/ar.js"></script>
 <script>THREEx.ArToolkitContext.baseURL = ''</script>
@@ -169,7 +172,7 @@
 	// init controls for camera
 	var markerControls = new THREEx.ArMarkerControls(arToolkitContext, camera, {
 		type : 'pattern',
-		patternUrl : THREEx.ArToolkitContext.baseURL + 'data/data/pattern-marker.patt',
+		patternUrl : THREEx.ArToolkitContext.baseURL + 'data/data/tut.patt',
 //patternUrl : THREEx.ArToolkitContext.baseURL + 'data/data/patt.hiro',
 		// patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.kanji',
 		// as we controls the camera, set changeMatrixMode: 'cameraTransformMatrix'
@@ -196,6 +199,98 @@
 			var light = new THREE.DirectionalLight( 0xffddcc, 1 );
 			light.position.set( 10, 0.75, 0.5 );
 			scene.add( light );
+			
+			
+	///////////////////////////////////////////////
+	//        Add other scean elements           //
+	///////////////////////////////////////////////
+	var sphere, cube;
+	 var scCube;
+    var selectableObjs = [];
+    var width = window.innerWidth, height = window.innerHeight;
+	 //Add other scene elements
+        drawSimpleSkybox();
+       drawShapes();
+		
+		function drawSimpleSkybox() {
+        // define path and box sides images
+        var path = 'textures/';
+        var sides = [ path + 'sbox_px.jpg', path + 'sbox_nx.jpg', path + 'sbox_py.jpg', path + 'sbox_ny.jpg', path + 'sbox_pz.jpg', path + 'sbox_nz.jpg' ];
+
+        // load images
+        scCube = THREE.ImageUtils.loadTextureCube(sides);
+        scCube.format = THREE.RGBFormat;
+
+        // prepare skybox material (shader)
+        var skyShader = THREE.ShaderLib["cube"];
+        skyShader.uniforms["tCube"].value = scCube;
+        var skyMaterial = new THREE.ShaderMaterial( {
+            fragmentShader: skyShader.fragmentShader, vertexShader: skyShader.vertexShader,
+            uniforms: skyShader.uniforms, depthWrite: false, side: THREE.BackSide
+        });
+
+        // create Mesh with cube geometry and add to the scene
+        var skyBox = new THREE.Mesh(new THREE.BoxGeometry(500, 500, 500), skyMaterial);
+        skyMaterial.needsUpdate = true;
+
+        skyBox.UserData = {name:"skyBox"};
+
+       // scene.add(skyBox);
+		
+    }
+	
+	   function drawShapes() {
+
+        var manager = new THREE.LoadingManager();
+        manager.onProgress = function ( item, loaded, total ) {
+
+            console.log( item, loaded, total );
+
+        };
+			
+			
+			
+        var objLoader = new THREE.OBJLoader( manager );
+		  objLoader.load( "models/Tutankhamen_charm.obj", meshloader("models/Tutankhamen_charm.obj"));
+		  
+		         function meshloader(fileName){
+            return function(geometry){
+
+                //Place in scene
+                var color;
+                
+                if (fileName.indexOf("Tutankhamen") !== -1){
+                    color = 0xFF6500;
+                    geometry.scale.set(10, 10, 10);
+                    geometry.position.x = 0;
+                    geometry.position.y = 0;
+					
+                    selectableObjs.push(geometry);
+                    geometry.userData = {name:"Tutankhamen", touched:false};
+                    scene.add(geometry);
+                }
+                
+                
+				
+				
+				
+                //Apply material
+                geometry.traverse(function (child) {
+                    if (child instanceof THREE.Mesh) {
+                        var material = new THREE.MeshPhongMaterial(
+                            { color: color,
+                                side: THREE.DoubleSide,
+                                emissive: 0x000000,
+                                envMap: scCube
+                            }
+                        );
+                        child.material = material;
+                    }
+                });
+
+            }
+        }
+		}
 	/////////////////////////////////////////////////////
 	//     add json object                             //
 	/////////////////////////////////////////////////////
@@ -233,7 +328,7 @@ transparent : true,
 
 				mesh = new THREE.Mesh( geometry, material );
 				
-				scene.add( mesh );
+				//scene.add( mesh );
 				mesh.scale.set( 0.8, 0.8, 0.8 );
 					// Setsup mesh rotation animation.
 	  function rotateObject(object, degreeX=0, degreeY= 0, degreeZ=0){
@@ -245,21 +340,40 @@ transparent : true,
 //to sit standing up
 //rotateObject(mesh, -90,-90,-90);
 rotateObject(mesh,-90,0,0);
+  
+  
+                 rotateObject(object,-90,0,0);
+				 
+ objLoader.rotation = Math.PI / 2;
+                
+            
+        });
 
-
-			} );
-
+			 
+  
 		}
 
 	//////////////////////////////////////////////////////////////////////////////////
 	//		render the whole thing on the page
 	//////////////////////////////////////////////////////////////////////////////////
-
+ 
+				 
 	// render the scene
 	onRenderFcts.push(function(){
 		renderer.render( scene, camera );
 		
 		mesh.rotation.y = mesh.rotation.y + 0.01;
+		      scene.traverse (function (object)
+        {
+            if (object instanceof THREE.Group)
+            {
+                object.rotation.y = object.rotation.y + -0.01;
+				 
+object.rotation.x = -90;
+                
+                
+            }
+        });
 	})
 
 	// run the rendering loop
