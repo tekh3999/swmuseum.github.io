@@ -1,398 +1,157 @@
- <!DOCTYPE html>
-<html lang="en">
-<meta charset="utf-8">
-<!--<meta name="viewport" container="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">-->
-<!-- three.js library -->
-<script src='vendor/three.js/build/three.min.js'></script>
+<!DOCTYPE html>
+<head>
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<title>Hello, AR Cubes!</title>
+	<!-- include three.js library -->
+	<script src='js/three.js'></script>
+	<!-- include jsartookit -->
+	<script src="jsartoolkit5/artoolkit.min.js"></script>
+	<script src="jsartoolkit5/artoolkit.api.js"></script>
+	<!-- include threex.artoolkit -->
+	<script src="threex/threex-artoolkitsource.js"></script>
+	<script src="threex/threex-artoolkitcontext.js"></script>
+	<script src="threex/threex-arbasecontrols.js"></script>
+	<script src="threex/threex-armarkercontrols.js"></script>
+</head>
 
-<!--Third-pary js-->
-   <script src="Third-party/OBJLoader.js"></script>
-<!-- ar.js -->
-<script src="build/ar.js"></script>
-<script>THREEx.ArToolkitContext.baseURL = ''</script>
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
 
-<style>
-<!--#container {
-    margin: 0px auto;
-    width: 500px;
-    height: 375px;
-    border: 10px #333 solid;
-}-->
-<!--#click{
-    width: 500px;
-    height: 375px;
-    background-color: #666;
-}-->
+<!-- 
+  Example created by Lee Stemkoski: https://github.com/stemkoski
+  Based on the AR.js library and examples created by Jerome Etienne: https://github.com/jeromeetienne/AR.js/
+-->
 
-#btn {
-    position: absolute;
-    display: block;
-    z-index: 99;
-    left: 0%;
-    top: 0%;
-	width: 30px;
-    height: 30px;
-	background-color: #0020FF
-	
-    }
-	
-	 .a1{
-	 color:white;
-	 }
-	
- 
-</style>
+<script>
 
-<body style='margin : 0px; overflow: hidden; font-family: Monospace;'> 
-</div>
-<!--<video autoplay = "true" id = "video">
-</video>-->
- 
-<button id='btn' onClick='video'><p><a class="a1"></a><p/></button>
-<div style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
+var scene, camera, renderer, clock, deltaTime, totalTime;
 
+var arToolkitSource, arToolkitContext;
 
+var markerRoot1, markerRoot2;
 
-</div><script>
+var mesh1;
 
- 
+initialize();
+animate();
 
+function initialize()
+{
+	scene = new THREE.Scene();
 
-	//////////////////////////////////////////////////////////////////////////////////
-	//		Init
-	//////////////////////////////////////////////////////////////////////////////////
+	let ambientLight = new THREE.AmbientLight( 0xcccccc, 0.5 );
+	scene.add( ambientLight );
+				
+	camera = new THREE.Camera();
+	scene.add(camera);
 
- // init renderer
-	var renderer	= new THREE.WebGLRenderer({
-		antialias: true,
+	renderer = new THREE.WebGLRenderer({
+		antialias : true,
 		alpha: true
 	});
-	//renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+	renderer.setClearColor(new THREE.Color('lightgrey'), 0)
 	renderer.setSize( 640, 480 );
 	renderer.domElement.style.position = 'absolute'
 	renderer.domElement.style.top = '0px'
 	renderer.domElement.style.left = '0px'
 	document.body.appendChild( renderer.domElement );
-	
-	var textureLoader = new THREE.TextureLoader();
 
-	// array of functions for the rendering loop
-	var onRenderFcts= [];
+	clock = new THREE.Clock();
+	deltaTime = 0;
+	totalTime = 0;
+	
+	////////////////////////////////////////////////////////////
+	// setup arToolkitSource
+	////////////////////////////////////////////////////////////
 
-	// init scene and camera
-	var scene	= new THREE.Scene();
-		
-	//////////////////////////////////////////////////////////////////////////////////
-	//		Initialize a basic camera
-	//////////////////////////////////////////////////////////////////////////////////
-
-	// Create a camera
-	var camera = new THREE.Camera();
-	scene.add(camera);
-	
-	
-	var video = document.querySelector("#videoElement");
-	//var video = new THREE.camera();
-	
-	if (navigator.mediaDevices.getUserMedia) {
-	navigator.mediaDevices.getUserMedia({camera: true})
-	.then (function(stream) {
-	camera.srcObject = stream;
-	camera.play();
-	})
-	.catch(function(err0r) {
-	console.log("somthing went wrong!");
-	});
-	}
-	
-	
-
-	////////////////////////////////////////////////////////////////////////////////
-	//          handle arToolkitSource
-	////////////////////////////////////////////////////////////////////////////////
-
-	var arToolkitSource = new THREEx.ArToolkitSource({
-		// to read from the webcam 
+	arToolkitSource = new THREEx.ArToolkitSource({
 		sourceType : 'webcam',
-		
-		// // to read from an image
-		// sourceType : 'image',
-		// sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/images/img.jpg',		
+	});
 
-		// to read from a video
-		// sourceType : 'video',
-		// sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/videos/headtracking.mp4',		
-	})
-
-	arToolkitSource.init(function onReady(){
-		onResize()
-	})
-	
-	// handle resize
-	window.addEventListener('resize', function(){
-		onResize()
-	})
-	function onResize(){
+	function onResize()
+	{
 		arToolkitSource.onResize()	
 		arToolkitSource.copySizeTo(renderer.domElement)	
-		if( arToolkitContext.arController !== null ){
+		if ( arToolkitContext.arController !== null )
+		{
 			arToolkitSource.copySizeTo(arToolkitContext.arController.canvas)	
 		}	
 	}
-	////////////////////////////////////////////////////////////////////////////////
-	//          initialize arToolkitContext
-	////////////////////////////////////////////////////////////////////////////////
+
+	arToolkitSource.init(function onReady(){
+		onResize()
+	});
 	
+	// handle resize event
+	window.addEventListener('resize', function(){
+		onResize()
+	});
+	
+	////////////////////////////////////////////////////////////
+	// setup arToolkitContext
+	////////////////////////////////////////////////////////////	
 
 	// create atToolkitContext
-	var arToolkitContext = new THREEx.ArToolkitContext({
-		cameraParametersUrl: THREEx.ArToolkitContext.baseURL + 'data/data/camera_para.dat',
-		detectionMode: 'mono',
-	})
-	// initialize it
-	arToolkitContext.init(function onCompleted(){
-		// copy projection matrix to camera
+	arToolkitContext = new THREEx.ArToolkitContext({
+		cameraParametersUrl: 'data/camera_para.dat',
+		detectionMode: 'mono'
+	});
+	
+	// copy projection matrix to camera when initialization complete
+	arToolkitContext.init( function onCompleted(){
 		camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
-	})
+	});
 
-	// update artoolkit on every frame
-	onRenderFcts.push(function(){
-		if( arToolkitSource.ready === false )	return
+	////////////////////////////////////////////////////////////
+	// setup markerRoots
+	////////////////////////////////////////////////////////////
 
-		arToolkitContext.update( arToolkitSource.domElement )
+	let loader = new THREE.TextureLoader();
+	let texture = loader.load( 'images/border.png' );
 		
-		// update scene.visible if the marker is seen
-		scene.visible = camera.visible
-	})
-		
-	////////////////////////////////////////////////////////////////////////////////
-	//          Create a ArMarkerControls
-	////////////////////////////////////////////////////////////////////////////////
+	let patternArray = ["letterA", "letterB", "letterC", "letterD", "letterF", "kanji", "hiro"];
+	let colorArray   = [0xff0000, 0xff8800, 0xffff00, 0x00cc00, 0x0000ff, 0xcc00ff, 0xcccccc];
+	for (let i = 0; i < 7; i++)
+	{
+		let markerRoot = new THREE.Group();
+		scene.add(markerRoot);
+		let markerControls = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
+			type : 'pattern', patternUrl : "data/" + patternArray[i] + ".patt",
+		});
 	
-	// init controls for camera
-	var markerControls = new THREEx.ArMarkerControls(arToolkitContext, camera, {
-		type : 'pattern',
-		patternUrl : THREEx.ArToolkitContext.baseURL + 'data/data/tut-clr.patt',
-//patternUrl : THREEx.ArToolkitContext.baseURL + 'data/data/patt.hiro',
-		// patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.kanji',
-		// as we controls the camera, set changeMatrixMode: 'cameraTransformMatrix'
-		changeMatrixMode: 'cameraTransformMatrix'
-	})
-	// as we do changeMatrixMode: 'cameraTransformMatrix', start with invisible scene
-	scene.visible = false
-
-	//////////////////////////////////////////////////////////////////////////////////
-	//		add an object in the scene												//
-	//////////////////////////////////////////////////////////////////////////////////
-
-	// add a torus knot	
- 
-	
-	
-	///////////////////////////////////////////////
-	//			Add Lights						 //
-	//////////////////////////////////////////////
-	
-	//var light = new THREE.DirectionalLight( 0xccccff, 1 );
-	var light = new THREE.AmbientLight(  0xccccff, 0.76 );
-			light.position.set( -200, 0.75, -0.5 );
-			scene.add( light );
-			
-			//ar light = new THREE.DirectionalLight( 0xffddcc, 1 );
-			 var light = new THREE.AmbientLight(  0xccccff, 0.7 );
-			light.position.set( 200, 0.75, 0.5 );
-			scene.add( light );
-			
-			
-	///////////////////////////////////////////////
-	//        Add other scean elements           //
-	///////////////////////////////////////////////
-	var sphere, cube;
-	 var scCube;
-    var selectableObjs = [];
-    var width = window.innerWidth, height = window.innerHeight;
-	 //Add other scene elements
-        drawSimpleSkybox();
-       drawShapes();
-		
-		function drawSimpleSkybox() {
-        // define path and box sides images
-        var path = 'textures/';
-        var sides = [ path + 'sbox_px.jpg', path + 'sbox_nx.jpg', path + 'sbox_py.jpg', path + 'sbox_ny.jpg', path + 'sbox_pz.jpg', path + 'sbox_nz.jpg' ];
-
-        // load images
-        scCube = THREE.ImageUtils.loadTextureCube(sides);
-        scCube.format = THREE.RGBFormat;
-
-        // prepare skybox material (shader)
-        var skyShader = THREE.ShaderLib["cube"];
-        skyShader.uniforms["tCube"].value = scCube;
-        var skyMaterial = new THREE.ShaderMaterial( {
-            fragmentShader: skyShader.fragmentShader, vertexShader: skyShader.vertexShader,
-            uniforms: skyShader.uniforms, depthWrite: false, side: THREE.BackSide
-        });
-
-        // create Mesh with cube geometry and add to the scene
-        var skyBox = new THREE.Mesh(new THREE.BoxGeometry(500, 500, 500), skyMaterial);
-        skyMaterial.needsUpdate = true;
-
-        skyBox.UserData = {name:"skyBox"};
-
-       // scene.add(skyBox);
-		
-    }
-	
-	   function drawShapes() {
-
-        var manager = new THREE.LoadingManager();
-        manager.onProgress = function ( item, loaded, total ) {
-
-            console.log( item, loaded, total );
-
-        };
-			
-			
-			
-        var objLoader = new THREE.OBJLoader( manager );
-		  objLoader.load( "models/Tutankhamen_charm.obj", meshloader("models/Tutankhamen_charm.obj"));
-		  
-		         function meshloader(fileName){
-            return function(geometry){
-
-                //Place in scene
-                var color;
-                
-                if (fileName.indexOf("Tutankhamen") !== -1){
-                    color = 0xFF6500;
-                    geometry.scale.set(10, 10, 10);
-                    geometry.position.x = 0;
-                    geometry.position.y = 0;
-					
-                    selectableObjs.push(geometry);
-                    geometry.userData = {name:"Tutankhamen", touched:false};
-                    scene.add(geometry);
-                }
-                
-                
-				
-				
-				
-                //Apply material
-                geometry.traverse(function (child) {
-                    if (child instanceof THREE.Mesh) {
-                        var material = new THREE.MeshPhongMaterial(
-                            { color: color,
-                                side: THREE.DoubleSide,
-                                emissive: 0x000000,
-                                envMap: scCube
-                            }
-                        );
-                        child.material = material;
-                    }
-                });
-
-            }
-        }
-		}
-	/////////////////////////////////////////////////////
-	//     add json object                             //
-	/////////////////////////////////////////////////////
-	
-	loadMymodel();
-	function loadMymodel( callback ) {
-
-			var loader = new THREE.JSONLoader();
-
-
-			//loader.load('obj/myfemale4/genesisfemale-5.js', function (geometry) {
-			    //loader.load( 'obj/books/tpomA.js', function( geometry ) {
-				//loader.load( 'obj/books/bandmd.js', function( geometry ) {
-				loader.load( 'obj/models/building.js', function( geometry ) {
-
-
-				var material = new THREE.MeshPhongMaterial( {
-				    specular: 0x211111,
-transparent : true,
-		opacity: 0.9,
-		 
-							//book
-				   // map: textureLoader.load('obj/books/diffuse_Image_1_AtlasUVs.jpg'),
-                    //ambientMap: textureLoader.load('obj/books/ambient_Image_1_AtlasUVs.jpg'),
-					
-					
-					//female
-					//map: textureLoader.load( 'obj/myfemale4/diffuse_Image_1_genesis5.jpg' ),
-					//specularMap: textureLoader.load( 'obj/myfemale4/specular_Image_1_genesis5.jpg' ),
-					//opacityMap: textureLoader.load( 'obj/myfemale4/opacity_Image_1_genesis5.jpg' ),
-
-
-					shininess: 0
-				} );
-
-				mesh = new THREE.Mesh( geometry, material );
-				
-				//scene.add( mesh );
-				mesh.scale.set( 0.8, 0.8, 0.8 );
-					// Setsup mesh rotation animation.
-	  function rotateObject(object, degreeX=0, degreeY= 0, degreeZ=0){
-			
-			object.rotateX(THREE.Math.degToRad(degreeX));
-			object.rotateY(THREE.Math.degToRad(degreeY));
-			object.rotateZ(THREE.Math.degToRad(degreeZ));
+		let mesh = new THREE.Mesh( 
+			new THREE.CubeGeometry(1.25,1.25,1.25), 
+			new THREE.MeshBasicMaterial({color:colorArray[i], map:texture, transparent:true, opacity:0.5}) 
+		);
+		mesh.position.y = 1.25/2;
+		markerRoot.add( mesh );
+	}
 }
-//to sit standing up
-//rotateObject(mesh, -90,-90,-90);
-rotateObject(mesh,-90,0,0);
-  
-  
-                 rotateObject(object,-90,0,0);
-				 
- objLoader.rotation = Math.PI / 2;
-                
-            
-        });
 
-			 
-  
-		}
 
-	//////////////////////////////////////////////////////////////////////////////////
-	//		render the whole thing on the page
-	//////////////////////////////////////////////////////////////////////////////////
- 
-				 
-	// render the scene
-	onRenderFcts.push(function(){
-		renderer.render( scene, camera );
-		
-		mesh.rotation.y = mesh.rotation.y + 0.01;
-		      scene.traverse (function (object)
-        {
-            if (object instanceof THREE.Group)
-            {
-                object.rotation.y = object.rotation.y + -0.01;
-				 
-object.rotation.x = -90;
-                
-                
-            }
-        });
-	})
+function update()
+{
+	// update artoolkit on every frame
+	if ( arToolkitSource.ready !== false )
+		arToolkitContext.update( arToolkitSource.domElement );
+}
 
-	// run the rendering loop
-	var lastTimeMsec= null
-	requestAnimationFrame(function animate(nowMsec){
-		// keep looping
-		requestAnimationFrame( animate );
-		// measure time
-		lastTimeMsec	= lastTimeMsec || nowMsec-1000/60
-		var deltaMsec	= Math.min(200, nowMsec - lastTimeMsec)
-		lastTimeMsec	= nowMsec
-		// call each update function
-		onRenderFcts.forEach(function(onRenderFct){
-			onRenderFct(deltaMsec/1000, nowMsec/1000)
-		})
-	})
+
+function render()
+{
+	renderer.render( scene, camera );
+}
+
+
+function animate()
+{
+	requestAnimationFrame(animate);
+	deltaTime = clock.getDelta();
+	totalTime += deltaTime;
+	update();
+	render();
+}
+
 </script>
+
 </body>
 </html>
