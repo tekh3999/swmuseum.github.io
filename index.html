@@ -67,7 +67,10 @@
 
 <!--<video autoplay = "true" id = "video">
 </video>-->
- 
+ <video id="video" autoplay loop crossOrigin="anonymous" webkit-playsinline style="display:none">
+	 
+	<source src="video/Beautiful.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+</video>
 <button id='btn' onClick='video'><p><a class="a1"></a><p/></button>
 <div style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
 
@@ -93,7 +96,7 @@
 		antialias: true,
 		alpha: true
 	});
- //renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+ renderer.setClearColor(new THREE.Color('lightgrey'), 0)
 	renderer.setSize( 1024, 768 );
 	renderer.domElement.style.position = 'absolute'
 	renderer.domElement.style.top = '0px'
@@ -112,7 +115,6 @@ var camera = new THREE.Camera();
 
 	 scene.add(camera);
 	 
-	 var video = document.querySelector("#videoElement");
 	 
 if (navigator.mediaDevices.getUserMedia) {
 	navigator.mediaDevices.getUserMedia({camera: true})
@@ -246,18 +248,24 @@ if (navigator.mediaDevices.getUserMedia) {
 			//loader.load('obj/myfemale4/genesisfemale-5.js', function (geometry) {
 			    //loader.load( 'obj/books/tpomA.js', function( geometry ) {
 				 
-				loader.load( 'obj/models/obtruck.js', function( geometry ) {
+				loader.load( 'obj/models/Boz-1.js', function( geometry ) {
 			 
 				//loader.load( 'obj/models/Helmet_base-model.js', function( geometry ) {
-				 
+				var video = document.getElementById( 'video' ); 
+				var texture = new THREE.VideoTexture( video );
+				texture.minFilter = THREE.LinearFilter;
+	texture.magFilter = THREE.LinearFilter;
+	texture.format = THREE.RGBFormat;
 			//loader.load( 'obj/models/building_model.js', function( geometry ) {
-				 var material = new THREE.MeshPhongMaterial( {
+				 var material = new THREE.MeshBasicMaterial( {
 				  // map: textureLoader.load('Images/Texans-logoUV.jpg'),
 				side: THREE.DoubleSide,
                                 emissive: 0x154360,
-							map:textureLoader.load('Images/cubetex.jpg'),
+							//map:textureLoader.load('Images/cubetex.jpg'),
+							overdraw: true,
+							map: texture,
                               color: 0x996633,
-								 // envMap: scCube,
+								 //envMap: scCube,
 								specular: 0x050505,
 				shininess: 175
 				} );
