@@ -26,8 +26,20 @@
 #btn {
     position: absolute;
     display: block;
-    z-index: 99;
+     z-index: 99;
     left: 2%;
+    top: 90%;
+	width: 60px;
+    height: 30px;
+	background-color: #0020FF
+	  color: cadetblue;
+    }
+	
+	#btn2 {
+    position: absolute;
+    display: block;
+    z-index: 100;
+    left: 10%;
     top: 90%;
 	width: 60px;
     height: 30px;
@@ -38,8 +50,11 @@
 
 <body style='margin : 0px; overflow: hidden; font-family: Monospace;'> 
  
-   
-<button id="btn" onclick="window.location.href = 'https://futureimagecomics.com/';">Home</button>
+  
+<button id="btn" onclick="window.location.href = 'https://futureimagecomics.com/';">
+Home</button>
+<button id='btn2' onClick='video'>Camera</button>
+
 <script>
 
  
