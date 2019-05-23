@@ -1,121 +1,74 @@
  <!DOCTYPE html>
 <html lang="en">
 <meta charset="utf-8">
---<meta name="viewport" container="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 <!-- three.js library -->
 <script src='vendor/three.js/build/three.min.js'></script>
- 
 <!-- ar.js -->
 <script src="build/ar.js"></script>
-
-  
-    <script src="./js/controls/TrackballControls.js"></script>
-    <script src="./js/libs/dat.gui.min.js"></script>
-    <script src="./js/libs/stats.min.js"></script>
-    <script src="./js/GPUParticleSystem.js"></script>
-	
-	
 <script>THREEx.ArToolkitContext.baseURL = ''</script>
 
 <style>
 #container {
     margin: 0px auto;
-    width: 0px;
-    height: 0px;
-    border: 0px;
+    width: 500px;
+    height: 375px;
+    border: 10px #333 solid;
 }
-<!--#click{
+#videoElement {
     width: 500px;
     height: 375px;
     background-color: #666;
-}-->
-
-#btn {
-    position: absolute;
-    display: block;
-    z-index: 99;
-
-    left: 2%;
-    top: 94%;
-
-    left: 0%;
-    top: 95%;
-
-	width: 30px;
-    height: 30px;
-	background-color: #0020FF
-	
-    }
-	
-	 .a1{
-	 color:white;
-	 }
-	
- 
+}
 </style>
 
 <body style='margin : 0px; overflow: hidden; font-family: Monospace;'> 
-
-
-</div>
-<div id="container"></div>
-
---<div id="container" ></div>
-</div>
-
-
-<!--<video autoplay = "true" id = "video">
+<!--</div>
+<video autoplay = "true" id = "videoElement">
 </video>-->
- <video id="video" autoplay style="display:none">
-	 
-	 <source src="video/sintel.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
-</video>
-<button id='btn' onClick='video'><p><a class="a1"></a><p/></button>
+
 <div style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
-
-
 
 </div><script>
 
- 	var camera, tick = 0,
-			scene, renderer, clock = new THREE.Clock(),
-			controls, container, video, gui = new dat.GUI( { width: 100 } ),
-			options, spawnerOptions, particleSystem;
+ 
 
-				
- var video
- 
- 
- 
- 
-  container = document.getElementById( 'container' );
- 	
-		
- var renderer	= new THREE.WebGLRenderer({
+
+	//////////////////////////////////////////////////////////////////////////////////
+	//		Init
+	//////////////////////////////////////////////////////////////////////////////////
+
+	// init renderer
+	var renderer	= new THREE.WebGLRenderer({
 		antialias: true,
 		alpha: true
 	});
- renderer.setClearColor(new THREE.Color('lightgrey'), 0)
-	renderer.setSize( 1024, 768 );
+	renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+	renderer.setSize( 640, 480 );
 	renderer.domElement.style.position = 'absolute'
 	renderer.domElement.style.top = '0px'
 	renderer.domElement.style.left = '0px'
-	renderer.setPixelRatio( window.devicePixelRatio );
-			renderer.setSize( window.innerWidth, window.innerHeight );
-			container.appendChild( renderer.domElement );
-document.body.appendChild( renderer.domElement );
+	document.body.appendChild( renderer.domElement );
 
-var textureLoader = new THREE.TextureLoader();
-var onRenderFcts= [];
-var scene	= new THREE.Scene();
+	// array of functions for the rendering loop
+	var onRenderFcts= [];
 
+	// init scene and camera
+	var scene	= new THREE.Scene();
+		
+	//////////////////////////////////////////////////////////////////////////////////
+	//		Initialize a basic camera
+	//////////////////////////////////////////////////////////////////////////////////
 
-var camera = new THREE.Camera();
-
-	 scene.add(camera);
-	 
-	 
-if (navigator.mediaDevices.getUserMedia) {
+	// Create a camera
+	var camera = new THREE.Camera();
+	scene.add(camera);
+	
+	
+	var video = document.querySelector("#videoElement");
+	//var video = new THREE.camera();
+	
+	if (navigator.mediaDevices.getUserMedia) {
 	navigator.mediaDevices.getUserMedia({camera: true})
 	.then (function(stream) {
 	camera.srcObject = stream;
@@ -126,6 +79,8 @@ if (navigator.mediaDevices.getUserMedia) {
 	});
 	}
 	
+	
+
 	////////////////////////////////////////////////////////////////////////////////
 	//          handle arToolkitSource
 	////////////////////////////////////////////////////////////////////////////////
@@ -189,14 +144,12 @@ if (navigator.mediaDevices.getUserMedia) {
 	////////////////////////////////////////////////////////////////////////////////
 	
 	// init controls for camera
-	var markerControls = new THREEx.ArMarkerControls(arToolkitContext, camera, {
-		type : 'pattern',
-		patternUrl : THREEx.ArToolkitContext.baseURL + 'data/data/pattern-marker.patt',
-//patternUrl : THREEx.ArToolkitContext.baseURL + 'data/data/patt.hiro',
+	var markerControls = mesh;
+		 
+		 
 		// patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.kanji',
 		// as we controls the camera, set changeMatrixMode: 'cameraTransformMatrix'
-		changeMatrixMode: 'cameraTransformMatrix'
-	})
+ 
 	// as we do changeMatrixMode: 'cameraTransformMatrix', start with invisible scene
 	scene.visible = false
 
@@ -205,274 +158,35 @@ if (navigator.mediaDevices.getUserMedia) {
 	//////////////////////////////////////////////////////////////////////////////////
 
 	// add a torus knot	
- 
-	
-	
-	///////////////////////////////////////////////
-	//			Add Lights						 //
-	///////////////////////////////////////////////
-	// var lightdi = new THREE.DirectionalLight( 0xffddcc, 10)
-	 //lightdi.position.set( 0, 100, 0 );
-			//scene.add( lightdi );
-		//var lightamb = new THREE.AmbientLight(  0x000000, 25 );
-			// lightamb.position.set( 0, 50, 0 );
-			//scene.add( lightamb );
-			
-			
-			//base model lighting setup
-			 var lightdi = new THREE.DirectionalLight( 0xffddcc, 2 )
-	 lightdi.position.set( 0, 100, 0 );
-			scene.add( lightdi );
-		var lightamb = new THREE.AmbientLight(  0x000000, 0.3 );
-			 lightamb.position.set( 0, 50, 0 );
-			scene.add( lightamb );
-			
-				//hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 5 );
-				//hemiLight.color.setHSL( 0.6, 1, 0.6 );
-				//hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
-				////hemiLight.position.set( 0, 50, 0 );
-				//scene.add( hemiLight );
-
-			//hemiLightHelper = new THREE.HemisphereLightHelper( hemiLight, 10 );
-			//scene.add( hemiLightHelper );
-		 
-	/////////////////////////////////////////////////////
-	//     add json object                             //
-	/////////////////////////////////////////////////////
-	
-	video = document.getElementById( 'video' );
-
-				var texture = new THREE.VideoTexture( video );
-				texture.minFilter = THREE.LinearFilter;
-	texture.magFilter = THREE.LinearFilter;
-	onRenderFcts.push(function(delta, now){
-		texture.update(delta, now)
-	})
- 	// add a torus knot	
 	var geometry	= new THREE.CubeGeometry(1,1,1);
-	var material	= new THREE.MeshBasicMaterial({
-		//transparent : true,
-		map: texture,
-		 overdraw: true,
-		 
-		//opacity: 0.5,
+	var material	= new THREE.MeshNormalMaterial({
+		transparent : true,
+		opacity: 0.5,
 		side: THREE.DoubleSide
 	}); 
 	var mesh	= new THREE.Mesh( geometry, material );
 	mesh.position.y	= geometry.parameters.height/2
+	//scene.add( mesh );
+	
+	var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,64,16);
+	var material	= new THREE.MeshNormalMaterial(); 
+	var mesh	= new THREE.Mesh( geometry, material );
+	mesh.position.y	= 0.1,
+	mesh.position.z = -3,
+	mesh.position.x = 0.2
 	scene.add( mesh );
 	
-	 
-	 
 	onRenderFcts.push(function(delta){
-		//mesh.rotation.x += Math.PI*delta
-		mesh.rotation.z = mesh.rotation.z - 0.01;
-		 
+		mesh.rotation.x += Math.PI*delta
 	})
 
-		
-	 
-
-	    /////////////////////////////
-		//	World                   //
-		/////////////////////////////
-		loadMymodeface();
-	function loadMymodeface( callback ) {
-		var loader3 = new THREE.JSONLoader();
-		loader3.load( 'obj/models/world.js', function( geometry ) {
-		 var material = new THREE.MeshPhongMaterial( {
-				    side: THREE.DoubleSide,
-                                //emissive: 0x154360,
-								map: textureLoader.load('Images/earth-day.jpg'),
-                              //color: 0x000000,
-								  //envMap: scCube,
-								specular: 0x050505,
-				shininess: 85
-				} );
-
-				mesh2 = new THREE.Mesh( geometry, material );
-				//scene.add( mesh2 ); 
-				mesh2.scale.set( 0.2, 0.2, 0.2 );
-				
-				mesh2.position.set(2, -5, 0);
-					// Sets up mesh rotation animation.
-	  function rotateObject3(object, degreeX=0, degreeY= 0, degreeZ=0){
-			
-			object.rotateX(THREE.Math.degToRad(degreeX));
-			object.rotateY(THREE.Math.degToRad(degreeY));
-			object.rotateZ(THREE.Math.degToRad(degreeZ));
-}
-//to sit standing up
-/// rotateObject3(mesh, -90,0,0);
-} );
-}
-
-		
-		////////////////////////////
-		//			Skybox		  //
-		///////////////////////////
-		var sphere, cube;
-	 var scCube;
-    var selectableObjs = [];
-    var width = window.innerWidth, height = window.innerHeight;
-	 //Add other scene elements
-        drawSimpleSkybox();
-       drawShapes();
-		
-		function drawSimpleSkybox() {
-        // define path and box sides images
-        var path = 'textures/';
-        var sides = [ path + 'sbox_px.jpg', path + 'sbox_nx.jpg', path + 'sbox_py.jpg', path + 'sbox_py.jpg', path + 'sbox_pz.jpg', path + 'sbox_nz.jpg' ];
-
-        // load images
-        scCube = THREE.ImageUtils.loadTextureCube(sides);
-        scCube.format = THREE.RGBFormat;
-
-        // prepare skybox material (shader)
-        var skyShader = THREE.ShaderLib["cube"];
-        skyShader.uniforms["tCube"].value = scCube;
-        var skyMaterial = new THREE.ShaderMaterial( {
-            fragmentShader: skyShader.fragmentShader, vertexShader: skyShader.vertexShader,
-            uniforms: skyShader.uniforms, depthWrite: false, side: THREE.BackSide
-        });
-
-        // create Mesh with cube geometry and add to the scene
-        var skyBox = new THREE.Mesh(new THREE.BoxGeometry(500, 500, 500), skyMaterial);
-        skyMaterial.needsUpdate = true;
-
-        skyBox.UserData = {name:"skyBox"};
-
-     // scene.add(skyBox);
- 
-		
-    }
-	
-	
-	    function drawShapes() {
-
-        var manager = new THREE.LoadingManager();
-        manager.onProgress = function ( item, loaded, total ) {
-
-            console.log( item, loaded, total );
-
-        };
-		}
-		
-		
-		
-		 	particleSystem = new THREE.GPUParticleSystem( {
-				maxParticles: 0
-			} );
-
-		// scene.add( particleSystem );
-
-			// options passed during each spawned
-
-			options = {
-				position: new THREE.Vector3(),
-				positionRandomness: .3,
-				velocity: new THREE.Vector3(),
-				velocityRandomness: .5,
-				color: 0xaa88ff,
-				colorRandomness: .2,
-				turbulence: .5,
-				lifetime: 2,
-				size: 2,
-				sizeRandomness: 1
-			};
-
-			spawnerOptions = {
-				spawnRate: 0,
-				horizontalSpeed: 1.5,
-				verticalSpeed: 1.33,
-				timeScale: 1
-			};
-
-			//
-
-			gui.add( options, "velocityRandomness", 0, 3 );
-			gui.add( options, "positionRandomness", 0, 3 );
-			gui.add( options, "size", 1, 20 );
-			gui.add( options, "sizeRandomness", 0, 17 );
-			gui.add( options, "colorRandomness", 0, 1 );
-			gui.add( options, "lifetime", .1, 10 );
-			gui.add( options, "turbulence", 0, 1 );
-
-			gui.add( spawnerOptions, "spawnRate", 10, 0 );
-			gui.add( spawnerOptions, "timeScale", -1, 1 );
-
-			//
-
-			stats = new Stats();
-			container.appendChild( stats.dom );
-
-		 
-
-		
-
-		function onWindowResize() {
-
-			camera.aspect = window.innerWidth / window.innerHeight;
-			camera.updateProjectionMatrix();
-
-			renderer.setSize( window.innerWidth, window.innerHeight );
-
-		}
-			
-				function animate() {
-
-			requestAnimationFrame( animate );
-
-			//controls.update();
-
-			var delta = clock.getDelta() * spawnerOptions.timeScale;
-			tick += delta;
-
-			if ( tick < 0 ) tick = 0;
-
-			if ( delta > 0 ) {
-
-				options.position.x = Math.sin( tick * spawnerOptions.horizontalSpeed ) * 2;
-				options.position.y = Math.sin( tick * spawnerOptions.verticalSpeed ) * 5;
-				options.position.z = Math.sin( tick * spawnerOptions.horizontalSpeed + spawnerOptions.verticalSpeed ) * 5;
-
-				for ( var x = 0; x < spawnerOptions.spawnRate * delta; x++ ) {
-
-					// Yep, that's really it.	Spawning particles is super cheap, and once you spawn them, the rest of
-					// their lifecycle is handled entirely on the GPU, driven by a time uniform updated below
-
-					particleSystem.spawnParticle( options );
-
-				}
-
-			}
-
-		
-		}
-
-		 
-		 
- 
 	//////////////////////////////////////////////////////////////////////////////////
 	//		render the whole thing on the page
 	//////////////////////////////////////////////////////////////////////////////////
-	
-	 
 
 	// render the scene
 	onRenderFcts.push(function(){
 		renderer.render( scene, camera );
-		
-		//mesh.rotation.y = mesh.rotation.y - 0.01;
-		//mesh2.rotation.y = mesh.rotation.y - 0.01;
-		 
-		
-			//particleSystem.update( tick );
-camera.rotation.y = 90;
-			//render();
-			stats.update();
-//animate();
-		 
 	})
 
 	// run the rendering loop
@@ -489,7 +203,6 @@ camera.rotation.y = 90;
 			onRenderFct(deltaMsec/1000, nowMsec/1000)
 		})
 	})
-	
 </script>
 </body>
 </html>
