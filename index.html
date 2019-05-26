@@ -15,11 +15,33 @@
     height: 375px;
     border: 10px #333 solid;
 }
-#videoElement {
-    width: 500px;
-    height: 375px;
-    background-color: #666;
-}
+ #btn {
+    position: absolute;
+    display: block;
+    z-index: 99;
+    left: 2%;
+    top: 94%;
+	width: 60px;
+    height: 30px;
+	background-color: #0020FF
+	  color: cadetblue;
+    }
+	
+	#btn2 {
+    position: absolute;
+    display: block;
+    z-index: 99;
+    left: 8%;
+    top: 94%;
+	width: 60px;
+    height: 30px;
+	background-color: #0020FF
+	color: cadetblue;
+    }
+	
+	 .a1{
+	 color:white;
+	 }
 </style>
 
 <body style='margin : 0px; overflow: hidden; font-family: Monospace;'> 
@@ -27,9 +49,11 @@
 <video autoplay = "true" id = "videoElement">-
 </video>-->
 
-<div style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
+  <button id="btn" onclick="window.location.href = '  https://futureimagecomics.com/';">Home</button>
+  
+   <button id="btn2" onclick="video';">Camera</button>
 
-</div><script>
+<script>
 
  
 
