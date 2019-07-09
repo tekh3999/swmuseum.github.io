@@ -195,16 +195,15 @@
 	var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,64,16);
 	var material	= new THREE.MeshNormalMaterial(); 
 	var mesh	= new THREE.Mesh( geometry, material );
-	//mesh.position.y	= 0.1,
-	//mesh.position.z = -3,
-	//mesh.position.x = 0.2
+	mesh.position.y	= 0.1,
+	mesh.position.z = -3,
+	mesh.position.x = 0.2
 	
-	mesh.position.set( 1, 1, 0 );
-		
-		var p = mesh.position.clone();
-		camera.updateMatrixWorld(); // FIX
-		p.project( camera )
-		console.log( p );
+	//mesh.position.set( 1, 1, 0 );
+		//var p = mesh.position.clone();
+		//camera.updateMatrixWorld(); // FIX
+		//p.project( camera )
+		//console.log( p );
 	scene.add( mesh );
 	
 	onRenderFcts.push(function(delta){
