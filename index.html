@@ -1,20 +1,32 @@
- <!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<!--<meta name="viewport" container="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">-->
 <!-- three.js library -->
-<script src='vendor/three.js/build/three.min.js'></script>
+<!--<script src='vendor/three.js/build/three.min.js'></script>-->
+<script src='build/three.js'></script>
 <!-- ar.js -->
 <script src="build/ar.js"></script>
 <script>THREEx.ArToolkitContext.baseURL = ''</script>
 
 <style>
-#container {
+<!--#container {
     margin: 0px auto;
     width: 500px;
     height: 375px;
     border: 10px #333 solid;
-}
+}-->
+<!--#click{
+    width: 500px;
+    height: 375px;
+    background-color: #666;
+}-->
+
  #btn {
     position: absolute;
     display: block;
@@ -31,7 +43,7 @@
     position: absolute;
     display: block;
     z-index: 99;
-    left: 13%;
+    left: 10%;
     top: 90%;
 	width: 60px;
     height: 30px;
@@ -42,18 +54,23 @@
 	 .a1{
 	 color:white;
 	 }
+	
+ 
 </style>
 
 <body style='margin : 0px; overflow: hidden; font-family: Monospace;'> 
-<!--</div>
-<video autoplay = "true" id = "videoElement">-
+</div>
+<!--<video autoplay = "true" id = "video">
 </video>-->
-
-  <button id="btn" onclick="window.location.href = '  https://futureimagecomics.com/';">Home</button>
+ 
+ <button id="btn" onclick="window.location.href = '  https://futureimagecomics.com/';">Home</button>
+  <button id="btn2" onclick="video';">Camera</button>
   
-   <button id="btn2" onclick="video';">Camera</button>
+<div style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
 
-<script>
+
+
+</div><script>
 
  
 
@@ -62,17 +79,21 @@
 	//		Init
 	//////////////////////////////////////////////////////////////////////////////////
 
-	// init renderer
+ // init renderer
 	var renderer	= new THREE.WebGLRenderer({
 		antialias: true,
 		alpha: true
 	});
-	renderer.setClearColor(new THREE.Color('lightgrey'), 0)
-	renderer.setSize( 640, 480 );
+	var fov = 45;
+	//renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+	 renderer.setSize( window.innerWidth, window.innerHeight );
+	 renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.domElement.style.position = 'absolute'
 	renderer.domElement.style.top = '0px'
 	renderer.domElement.style.left = '0px'
 	document.body.appendChild( renderer.domElement );
+	
+	var textureLoader = new THREE.TextureLoader();
 
 	// array of functions for the rendering loop
 	var onRenderFcts= [];
@@ -168,12 +189,15 @@
 	////////////////////////////////////////////////////////////////////////////////
 	
 	// init controls for camera
-	var markerControls = mesh;
-		 
-		 
+	var markerControls = new THREEx.ArMarkerControls(arToolkitContext, camera, {
+		type : 'pattern',
+		patternUrl : THREEx.ArToolkitContext.baseURL + 'data/data/pattern-marker.patt',
+		 // patternUrl : THREEx.ArToolkitContext.baseURL + 'data/data/pattern-marker(6).patt',
+//patternUrl : THREEx.ArToolkitContext.baseURL + 'data/data/patt.hiro',
 		// patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.kanji',
 		// as we controls the camera, set changeMatrixMode: 'cameraTransformMatrix'
- 
+		changeMatrixMode: 'cameraTransformMatrix'
+	})
 	// as we do changeMatrixMode: 'cameraTransformMatrix', start with invisible scene
 	scene.visible = false
 
@@ -182,34 +206,141 @@
 	//////////////////////////////////////////////////////////////////////////////////
 
 	// add a torus knot	
-	var geometry	= new THREE.CubeGeometry(1,1,1);
-	var material	= new THREE.MeshNormalMaterial({
-		transparent : true,
-		opacity: 0.5,
-		side: THREE.DoubleSide
-	}); 
-	var mesh	= new THREE.Mesh( geometry, material );
-	mesh.position.y	= geometry.parameters.height/2
-	//scene.add( mesh );
+ 
 	
-	var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,64,16);
-	var material	= new THREE.MeshNormalMaterial(); 
-	var mesh	= new THREE.Mesh( geometry, material );
-	mesh.position.y	= 0.1,
-	mesh.position.z = -3,
-	mesh.position.x = 0.2
 	
-	//mesh.position.set( 1, 1, 0 );
-		//var p = mesh.position.clone();
-		//camera.updateMatrixWorld(); // FIX
-		//p.project( camera )
-		//console.log( p );
-	scene.add( mesh );
+	///////////////////////////////////////////////
+	//			Add Lights						 //
+	//////////////////////////////////////////////
+	var light = new THREE.DirectionalLight( 0xffddcc, 1 );
+			light.position.set( 1, 1, -5 );
+			scene.add( light );
+			
+			var light = new THREE.AmbientLight( 0xccccff,  1);
+			light.position.set( -1, -100, 0.5 );
+			scene.add( light );
+			
+			
+	/////////////////////////////////////////////////////
+	//     add json object                             /
+	/////////////////////////////////////////////////////
 	
-	onRenderFcts.push(function(delta){
-		mesh.rotation.x += Math.PI*delta
-	})
+	loadMymodel();
+	function loadMymodel( callback ) {
 
+			var loader = new THREE.JSONLoader();
+			 loader.load( 'obj/models/JJ_Watt.js', function( geometry ) {
+				//loader.load( 'obj/models/jj_watt_base2.js', function( geometry ) {
+				var material = new THREE.MeshPhongMaterial( {
+				//var material = new THREE.MeshLambertMaterial( {
+				    specular: 0x211111,
+//transparent : true,
+		//opacity: 0.9,
+		   
+				map: textureLoader.load('Images/JJ_Watt_base_Diffuse_white_glove2.jpg'),
+				//map: textureLoader.load('Images/JJ_Watt_base_Diffuse_white_glove3.jpg'),
+					//specularMap: textureLoader.load( 'obj/myfemale4/specular_Image_1_genesis5.jpg' ),
+					//opacityMap: textureLoader.load( 'obj/myfemale4/opacity_Image_1_genesis5.jpg' ),
+				shininess:25
+				} );
+
+				mesh = new THREE.Mesh( geometry, material );
+				scene.add( mesh );
+				mesh.scale.set( 7, 7, 7 );
+				//Smooth object if mesh is triangulated 
+				mesh.geometry.computeVertexNormals(true);
+				//mesh.position.set(0, -20, 0);
+					// Setsup mesh rotation animation.
+	  function rotateObject(object, degreeX=0, degreeY= 0, degreeZ=0){
+			
+			object.rotateX(THREE.Math.degToRad(degreeX));
+			object.rotateY(THREE.Math.degToRad(degreeY));
+			object.rotateZ(THREE.Math.degToRad(degreeZ));
+}
+//to sit standing up
+//rotateObject(mesh, 90,90,90);
+rotateObject(mesh, -90,0,0);
+} );
+}
+
+
+		////////////
+		//	Helmet//
+		///////////
+		loadMymodelI();
+	function loadMymodelI( callback ) {
+		var loader2 = new THREE.JSONLoader();
+		 loader2.load( 'obj/models/JJ_Watt_Helmet.js', function( geometry ) {
+		 var material = new THREE.MeshPhongMaterial( {
+		 map: textureLoader.load('Images/DeAndre_Hopkins_helmet_DiffuseMap_rig1.jpg'),
+		  // map: textureLoader.load('Images/jj_watt_helmet_DiffuseMap_rig1.jpg'),
+		 
+				    side: THREE.DoubleSide,
+                               // emissive: 0x154360,
+								//color: 0x996633,
+							// envMap: scCube,
+								 specular: 0x050505,
+				shininess: 75
+				} );
+ 
+				mesh2 = new THREE.Mesh( geometry, material );
+				scene.add( mesh2 );
+				mesh2.scale.set( 7, 7, 7 );
+				 mesh2.geometry.computeVertexNormals(true);
+					// Setsup mesh rotation animation.
+	  function rotateObject2(object, degreeX=0, degreeY= 0, degreeZ=0){
+			
+			object.rotateX(THREE.Math.degToRad(degreeX));
+			object.rotateY(THREE.Math.degToRad(degreeY));
+			object.rotateZ(THREE.Math.degToRad(degreeZ));
+}
+//to sit standing up
+//rotateObject(mesh, -90,-90,-90);
+rotateObject2(mesh2, -90,0,0);
+} );
+}
+
+
+		 
+	
+////////////////////////////
+		//			Skybox		  //
+		///////////////////////////
+		var sphere, cube;
+	 var scCube;
+    var selectableObjs = [];
+    var width = window.innerWidth, height = window.innerHeight;
+	 //Add other scene elements
+        drawSimpleSkybox();
+      // drawShapes();
+		
+		function drawSimpleSkybox() {
+        // define path and box sides images
+        var path = 'textures/';
+        var sides = [ path + 'sbox_px.jpg', path + 'sbox_nx.jpg', path + 'sbox_py.jpg', path + 'sbox_py.jpg', path + 'sbox_pz.jpg', path + 'sbox_nz.jpg' ];
+
+        // load images
+        scCube = THREE.ImageUtils.loadTextureCube(sides);
+        scCube.format = THREE.RGBFormat;
+
+        // prepare skybox material (shader)
+        var skyShader = THREE.ShaderLib["cube"];
+        skyShader.uniforms["tCube"].value = scCube;
+        var skyMaterial = new THREE.ShaderMaterial( {
+            fragmentShader: skyShader.fragmentShader, vertexShader: skyShader.vertexShader,
+            uniforms: skyShader.uniforms, depthWrite: false, side: THREE.BackSide
+        });
+
+        // create Mesh with cube geometry and add to the scene
+        var skyBox = new THREE.Mesh(new THREE.BoxGeometry(500, 500, 500), skyMaterial);
+        skyMaterial.needsUpdate = true;
+
+        skyBox.UserData = {name:"skyBox"};
+
+      //scene.add(skyBox);
+ 
+		
+    }
 	//////////////////////////////////////////////////////////////////////////////////
 	//		render the whole thing on the page
 	//////////////////////////////////////////////////////////////////////////////////
@@ -217,6 +348,10 @@
 	// render the scene
 	onRenderFcts.push(function(){
 		renderer.render( scene, camera );
+		
+		mesh.rotation.y = mesh.rotation.y + 0.01;
+		mesh2.rotation.y = mesh2.rotation.y + 0.01;
+		 
 	})
 
 	// run the rendering loop
